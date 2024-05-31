@@ -8,7 +8,6 @@ class Program
 {
     static void Main(string[] args)
     {
-        // Algorytmy do przetestowania
         SymmetricAlgorithm[] algorithms = new SymmetricAlgorithm[]
         {
             new AesCryptoServiceProvider { KeySize = 128 },
@@ -21,29 +20,23 @@ class Program
             new TripleDESCryptoServiceProvider()
         };
 
-        // Rozmiar bloku danych do testowania
-        int dataSize = 1024 * 1024; // 1 MB
+        int dataSize = 1024 * 1024; 
         byte[] data = new byte[dataSize];
         new Random().NextBytes(data);
 
-        // Wyniki pomiarów
         Console.WriteLine("Algorytm\tSekund/Blok\tBajtów/sek (RAM)\tBajtów/sek (HDD)");
 
         foreach (var algorithm in algorithms)
         {
-            // Generowanie kluczy
             algorithm.GenerateKey();
             algorithm.GenerateIV();
 
-            // Pomiar dla RAM
             var ramEncryptTime = MeasureTime(() => EncryptData(algorithm, data));
             var ramDecryptTime = MeasureTime(() => DecryptData(algorithm, EncryptData(algorithm, data)));
 
-            // Pomiar dla HDD
             var hddEncryptTime = MeasureTime(() => EncryptDataFromFile(algorithm, "data.bin", "encrypted.bin"));
             var hddDecryptTime = MeasureTime(() => DecryptDataFromFile(algorithm, "encrypted.bin", "decrypted.bin"));
 
-            // Wyniki
             double blockTime = (ramEncryptTime + ramDecryptTime) / 2.0;
             double bytesPerSecondRam = dataSize / ((ramEncryptTime + ramDecryptTime) / 2.0);
             double bytesPerSecondHdd = dataSize / ((hddEncryptTime + hddDecryptTime) / 2.0);
